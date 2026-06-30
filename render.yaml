@@ -4,7 +4,7 @@ services:
     name: food-waste-management-server
     runtime: node
     plan: free
-    rootDirectory: server
+    rootDir: server
     buildCommand: npm install && npm run prisma:generate
     startCommand: npm start
     envVars:
@@ -22,7 +22,7 @@ services:
     name: food-waste-management-client
     runtime: static
     plan: free
-    rootDirectory: client
+    rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
