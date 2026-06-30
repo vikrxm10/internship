@@ -22,6 +22,11 @@ jobs:
           cd server
           npm install
           
+      - name: Generate Prisma Client
+        run: |
+          cd server
+          npx prisma generate
+          
       - name: Run Server Tests
         run: |
           cd server
