@@ -1,0 +1,110 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  RESTAURANT
+  NGO
+}
+
+enum DonationStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id             String      @id @default(uuid())
+  name           String
+  email          String      @unique
+  password       String
+  role           Role        @default(RESTAURANT)
+  location       String
+  createdAt      DateTime    @default(now())
+  
+  foodItems      FoodItem[]
+  wasteLogs      WasteLog[]
+  donations      Donation[]  @relation("DonorDonations")
+  acceptedDonations Donation[] @relation("RecipientDonations")
+  inventories    Inventory[]
+  notifications  Notification[]
+}
+
+model FoodItem {
+  id          String      @id @default(uuid())
+  name        String
+  category    String      // e.g., Bakery, Dairy, Produce, Meat, Meals
+  quantity    Float
+  unit        String      // e.g., kg, lbs, portions, items
+  expiryDate  DateTime
+  createdAt   DateTime    @default(now())
+  
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  wasteLogs   WasteLog[]
+  donations   Donation[]
+  inventories Inventory[]
+}
+
+model WasteLog {
+  id             String    @id @default(uuid())
+  foodItemId     String
+  foodItem       FoodItem  @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
+  quantityWasted Float
+  reason         String    // e.g., Expired, Spoiled, Overproduced
+  loggedAt       DateTime  @default(now())
+  
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Donation {
+  id             String         @id @default(uuid())
+  foodItemId     String
+  foodItem       FoodItem       @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
+  
+  donorId        String
+  donor          User           @relation("DonorDonations", fields: [donorId], references: [id], onDelete: Cascade)
+  
+  recipientId    String?
+  recipient      User?          @relation("RecipientDonations", fields: [recipientId], references: [id], onDelete: SetNull)
+  
+  status         DonationStatus @default(PENDING)
+  pickupLocation String
+  pickupLat      Float
+  pickupLng      Float
+  scheduledAt    DateTime
+  createdAt      DateTime       @default(now())
+}
+
+model Inventory {
+  id            String    @id @default(uuid())
+  foodItemId    String
+  foodItem      FoodItem  @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
+  currentStock  Float
+  minStockAlert Float
+  lastUpdated   DateTime  @default(now()) @updatedAt
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   // e.g., INFO, SUCCESS, WARNING, DONATION
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

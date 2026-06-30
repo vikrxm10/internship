@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm install
+          
+      - name: Run Server Tests
+        run: |
+          cd server
+          npm run test
+          
+  frontend-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm install
+          
+      - name: Run Client Lint
+        run: |
+          cd client
+          npm run lint
+          
+      - name: Build Client
+        run: |
+          cd client
+          npm run build
