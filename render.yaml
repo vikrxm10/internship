@@ -3,6 +3,7 @@ services:
     name: food-waste-management-server
     env: node
     plan: free
+    rootDirectory: server
     buildCommand: npm install && npm run prisma:generate
     startCommand: npm start
     envVars:
