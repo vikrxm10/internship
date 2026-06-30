@@ -1,4 +1,5 @@
 services:
+  # 1. Backend Service (Express + Prisma)
   - type: web
     name: food-waste-management-server
     env: node
@@ -15,3 +16,20 @@ services:
         sync: false
       - key: NODE_ENV
         value: production
+
+  # 2. Frontend Service (React + Vite Static Site)
+  - type: static
+    name: food-waste-management-client
+    plan: free
+    rootDirectory: client
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    routes:
+      # Rewrite all routes to index.html for React Router SPA routing
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Required for Vite build-time environment variable injection
+      - key: VITE_API_URL
+        sync: false
